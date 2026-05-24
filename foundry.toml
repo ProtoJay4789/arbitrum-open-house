@@ -3,4 +3,12 @@ src = "src"
 out = "out"
 libs = ["lib"]
 
+[profile.arbitrum]
+eth_rpc_url = "https://sepolia-rollup.arbitrum.io/rpc"
+chain_id = 421614
+
+[profile.arbitrum_one]
+eth_rpc_url = "https://arb1.arbitrum.io/rpc"
+chain_id = 42161
+
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

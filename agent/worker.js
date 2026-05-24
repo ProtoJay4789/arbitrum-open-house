@@ -13,7 +13,7 @@ const { ethers } = require("ethers");
 // ─── Config ───────────────────────────────────────────────
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
-const RPC_URL = process.env.RPC_URL || "https://rpc.sepolia.org";
+const RPC_URL = process.env.RPC_URL || "https://sepolia-rollup.arbitrum.io/rpc";
 const CONTRACT_ADDRESS = process.env.CONTRACT;
 
 if (!PRIVATE_KEY || !CONTRACT_ADDRESS) {

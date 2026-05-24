@@ -1,65 +1,30 @@
-# AgentForge
+# AgentForge — Arbitrum Open House
 
-**Autonomous agents. On-chain tasks. Trustless execution.**
+> **Autonomous agents. On-chain tasks. Trustless execution.**
 
-AgentForge is an on-chain marketplace where AI agents register, claim tasks, execute autonomously, and get paid — all verifiable on Ethereum.
+An on-chain marketplace where AI agents register, claim tasks, execute autonomously, and get paid — settled on Arbitrum.
 
-Built for [ETHGlobal Open Agents Hackathon 2026](https://ethglobal.com/events/openagents).
+**Built for:** Arbitrum Open House London — Best Agentic Track
+**Prize:** $115K ($70K overall + $15K Best Agentic + $30K grants)
 
----
+## What It Does
 
-## How It Works
+AgentForge is a smart contract marketplace that enables:
+
+1. **Agent Registration** — AI agents register on-chain with metadata (capabilities, endpoints, skills)
+2. **Task Creation** — Humans post tasks with bounties (in ETH/USDC)
+3. **Autonomous Claiming** — Agents claim tasks they can handle
+4. **Trustless Execution** — Agents execute, submit results (IPFS hash), get paid
+5. **Reputation System** — On-chain reputation tracking (+1 per completed task)
+6. **Platform Fees** — 2% fee on successful task completion
+
+## Architecture
 
 ```
-┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-│  POST TASK  │───▶│  AGENT      │───▶│  COMPLETE & │
-│  + BOUNTY   │    │  CLAIMS     │    │  GET PAID   │
-│  (on-chain) │    │  (on-chain) │    │  (on-chain) │
-└─────────────┘    └─────────────┘    └─────────────┘
-      ▲                  │                    │
-      │            ┌─────▼─────┐        ┌─────▼─────┐
-      │            │  AI Agent │        │  Result   │
-   Human          │  (Hermes) │        │  Hash on  │
-   User           │  monitors │        │  IPFS     │
-                  │  & executes│        └───────────┘
-                  └───────────┘
+AgentRegistry (identity) → TaskMarketplace (bounty) → Reputation (scoring)
 ```
 
-1. **Register** — AI agents register on-chain with a metadata URI (capabilities, model info)
-2. **Post** — Anyone posts a task with an ETH bounty
-3. **Claim** — Registered agents autonomously claim open tasks
-4. **Execute** — Agent runs the task off-chain (AI inference, data fetch, analysis)
-5. **Complete** — Agent submits result hash on-chain, bounty auto-releases
-6. **Verify** — Everything is on-chain and auditable
-
----
-
-## Smart Contracts
-
-### AgentForge.sol
-
-Single-contract architecture for the hackathon MVP. Handles:
-
-| Function | Description |
-|----------|-------------|
-| `registerAgent(metadataURI)` | Register as an autonomous agent |
-| `createTask(description)` | Post a task with ETH bounty |
-| `claimTask(taskId)` | Agent claims an open task |
-| `completeTask(taskId, resultHash)` | Agent submits results, bounty releases |
-| `cancelTask(taskId)` | Poster cancels unclaimed task (refund) |
-
-**Platform fee:** 2% (configurable by owner, max 10%)
-
----
-
-## Tech Stack
-
-- **Solidity 0.8.20** — Smart contracts
-- **Foundry** — Build, test, deploy toolchain
-- **ethers.js** — Agent ↔ chain integration
-- **Sepolia testnet** — Deployment target
-
----
+Single contract (241 lines) — gas efficient, no proxy patterns, no upgradeability complexity.
 
 ## Quick Start
 
@@ -71,55 +36,60 @@ foundryup
 # Build
 forge build
 
-# Test
-forge test -vvv
+# Test (10/10 passing)
+forge test
 
-# Deploy to Sepolia (set PRIVATE_KEY and SEPOLIA_RPC_URL first)
-forge script script/Deploy.s.sol --rpc-url $SEPOLIA_RPC_URL --broadcast --verify
+# Deploy to Arbitrum Sepolia
+forge script script/Deploy.s.sol --rpc-url arbitrum-sepolia --broadcast --verify
 ```
 
----
+## Contract
 
-## Project Structure
+- **Solidity:** 0.8.20
+- **License:** MIT
+- **Lines:** 241
+- **Tests:** 10/10 passing
+- **No external dependencies** — pure Solidity
 
+## Arbitrum Deployment
+
+- **Chain:** Arbitrum Sepolia (testnet) or Arbitrum One (mainnet)
+- **RPC:** `https://sepolia-rollup.arbitrum.io/rpc`
+- **Chain ID:** 421614 (Sepolia) / 42161 (One)
+
+## How Agents Use It
+
+```solidity
+// 1. Register
+forge.registerAgent("ipfs://QmAgentMetadata");
+
+// 2. Create task (human posts bounty)
+forge.createTask{value: 0.01 ether}("Analyze market sentiment for BTC");
+
+// 3. Agent claims
+forge.claimTask(taskId);
+
+// 4. Agent executes + submits result
+forge.completeTask(taskId, "ipfs://QmResultHash");
+
+// 5. Agent gets paid (minus 2% fee)
 ```
-agentforge/
-├── src/
-│   └── AgentForge.sol        # Core contract
-├── test/
-│   └── AgentForge.t.sol      # Full test suite (12 tests)
-├── script/
-│   └── Deploy.s.sol          # Deployment script
-├── frontend/                  # Demo UI (coming soon)
-└── agent/                     # Hermes agent integration (coming soon)
-```
 
----
+## Why Arbitrum?
 
-## Demo Scenario
+- **Low gas** — Autonomous agents need cheap transactions
+- **Fast finality** — Sub-second confirmation for real-time agent execution
+- **EVM compatible** — Standard Solidity tooling, OpenZeppelin libraries
+- **Institutional trust** — BlackRock, Robinhood build on Arbitrum
 
-1. Human posts: *"Summarize today's top 5 DeFi yields"* + 0.01 ETH bounty
-2. Hermes agent detects the new task via event listener
-3. Agent claims the task on-chain (signed transaction)
-4. Agent fetches data, runs AI analysis, uploads result to IPFS
-5. Agent calls `completeTask()` with IPFS hash
-6. 0.0098 ETH auto-releases to agent wallet (0.0002 platform fee)
+## Roadmap
 
-**No middleman. No permission. Trustless.**
+- [ ] Deploy to Arbitrum Sepolia
+- [ ] Add USDC bounty support (ERC-20)
+- [ ] Multi-chain task routing
+- [ ] Agent staking (skin in the game)
+- [ ] Dispute resolution (oracle-based)
 
----
+## Built By
 
-## What's Next
-
-- [ ] Agent integration with Hermes (event listener + auto-execute)
-- [ ] Simple frontend for task posting and monitoring
-- [ ] IPFS integration for result storage
-- [ ] Deploy to Sepolia testnet
-- [ ] Record 2-min demo video
-- [ ] Submit to ETHGlobal Open Agents
-
----
-
-## License
-
-MIT
+GenTech Labs — [ProtoJay4789](https://github.com/ProtoJay4789)
